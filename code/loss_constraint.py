@@ -1,6 +1,40 @@
 import numpy as np
 import pandas as pd
 
+
+
+def color_loss(up_color, body_color):
+    l = len(body_color)
+    count = 0
+    state = up_color[0]
+    t = 0
+    
+    for i in range(0,l):
+        if state == up_color[i]: # 颜色一致，不切换
+            t += 40
+            if state == body_color[i]: # 颜色一致，不切换
+                t+= 40
+                count += 1
+                if count == 5: #连续5辆，清洗
+                    count = 0
+                    t += 80
+            else: # 颜色不一致，清洗切换
+                t += 120
+                count = 0
+                state = body_color[i]
+        else:  #颜色不一致，清洗切换
+            state = up_color[i]
+            t += 120
+            count = 0
+            if state == body_color[i]:
+                t += 40
+                count += 1
+            else:
+                t += 120
+                state = body_color[i]
+                count = 0
+    return t
+'''
 # 涂装车间用时
 def color_loss(up_color, body_color):
     # up_color为加工计划的车顶颜色     黑曜黑，石黑，无对比颜色，特殊颜色（绿色）事先将无对比颜色转为对应的车身颜色
@@ -48,7 +82,7 @@ def color_loss(up_color, body_color):
                 state = body_color[i]
                 t += 120
     return t
-
+'''
 #焊装车间用时
 def welding_loss(car_type):
     # car_type 为加工计划的车型列表[A,B...]

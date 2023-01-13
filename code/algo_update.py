@@ -64,7 +64,7 @@ def cross_op_2(a,b):
 def swap(parent):
     # 交换亲本中两个元素位置
     n = parent.shape[0]
-    x = np.array([i for i in range(0,n-1)])
+    x = np.array([i for i in range(0,n)])
     cut = np.sort(np.random.choice(x,2,replace= False))
     child = np.copy(parent)
     child[cut[0]] = parent[cut[1]]
@@ -74,7 +74,7 @@ def swap(parent):
 def reverse(parent):
     #将亲本中间的片段进行倒序
     n = parent.shape[0]
-    x = np.array([i for i in range(0,n-1)])
+    x = np.array([i for i in range(0,n+1)])
     cut = np.sort(np.random.choice(x,2,replace= False))
     child = np.copy(parent)
     child[cut[0]:cut[1]] = np.flipud(parent[cut[0]:cut[1]])
@@ -255,6 +255,28 @@ def get_child(population, fitness, data, n_2, cross_type = 'cross_op_1'):
     children = np.concatenate((target_1,target_2,target_3),axis = 0)
     return children
 
-
-
-
+#------------------------------------------------------------------------
+'''
+#三目标模拟退火算法求解
+def SA(data, N,T,alpha,maxit,exit_t,search = 'reverse'):
+    # data 问题的解的数目
+    # N 解的数目
+    # T  初始温度
+    #alpha 温度下降速率 T *= alpha
+    #maxit 同一温度下最大迭代次数
+    #search 搜索邻域解的方式
+    #exit_t 退火终止温度
+    
+    population = generator(data,N)
+    best_cost = []  # 记录每个温度下的最优值
+    mean_cost = []  # 记录每个温度下的平均值
+    while T > exit_t:
+        T_best = np.apply_along_axis(lambda x: lc.loss(x,data),axis=1,arr = population)
+        T_cost = np.zeros((maxit,4))
+        for i in range(0,maxit):
+            
+    
+    best_cost = np.min(cost,axis = 0)
+    mean_record = np.zeros((T,4),dtype = np.int32)
+    best_record = np.zeros((T,4),dtype = np.int32)
+''''''
