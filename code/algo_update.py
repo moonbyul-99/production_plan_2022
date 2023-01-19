@@ -279,4 +279,4 @@ def SA(data, N,T,alpha,maxit,exit_t,search = 'reverse'):
     best_cost = np.min(cost,axis = 0)
     mean_record = np.zeros((T,4),dtype = np.int32)
     best_record = np.zeros((T,4),dtype = np.int32)
-''''''
+'''

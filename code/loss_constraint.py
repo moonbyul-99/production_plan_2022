@@ -1,20 +1,19 @@
 import numpy as np
 import pandas as pd
 
-
-
-def color_loss(up_color, body_color):
+def color_loss(up_color, body_color,r = 0):
+#当出现连续生产时, 喷漆时间修正为40/(1+r)**count  r >= 0
     l = len(body_color)
     count = 0
     state = up_color[0]
     t = 0
-    
+
     for i in range(0,l):
         if state == up_color[i]: # 颜色一致，不切换
-            t += 40
+            t += 40/(1+r)**count
             if state == body_color[i]: # 颜色一致，不切换
-                t+= 40
                 count += 1
+                t += 40/(1+r)**count
                 if count == 5: #连续5辆，清洗
                     count = 0
                     t += 80
@@ -34,55 +33,8 @@ def color_loss(up_color, body_color):
                 state = body_color[i]
                 count = 0
     return t
-'''
-# 涂装车间用时
-def color_loss(up_color, body_color):
-    # up_color为加工计划的车顶颜色     黑曜黑，石黑，无对比颜色，特殊颜色（绿色）事先将无对比颜色转为对应的车身颜色
-    # body_color 为加工计划的车身颜色  薄雾灰，天空灰，飞行蓝，水晶紫，水晶珍珠白，明亮红，闪耀黑
-    l = len(body_color)
-    count = 0
-    state = up_color[0]
-    t = 0 
 
-    #前5辆车不需要强制清洗喷头
-    for i in range(0,5):
-        if state == up_color[i]:
-            t+=40
-        else:
-            state = up_color[i]
-            t += 120
-        if state == body_color[i]:
-            t += 40
-        else: 
-            t += 120
-            state = body_color[i]
-            
-    for i in range(5,l):
-        #判断是否为5k辆车，决定是否需要强制清洗喷头
-        if i%5 == 0:
-            # 清洗喷头时间 加 车顶时间
-            t+= 120
-            state =up_color[i] #切换喷头状态
-            if state == body_color[i]:
-                t += 40
-            else:
-                state = body_color[i]
-                t += 120
 
-        else: #不需要强制清洗喷头
-            if state == up_color[i]: #不需要切换喷头状态
-                t += 40
-            else: # 喷头状态与车顶颜色不一致，切换
-                state = up_color[i]
-                t += 120
-
-            if state == body_color[i]:#车身车顶一致，不用切换
-                t += 40
-            else:
-                state = body_color[i]
-                t += 120
-    return t
-'''
 #焊装车间用时
 def welding_loss(car_type):
     # car_type 为加工计划的车型列表[A,B...]
@@ -115,20 +67,42 @@ def welding_loss(car_type):
         n += 1
     return t 
 
+#总装车间用时
+def install_loss(engine_type,r = 0):
+#engine_type 记录四驱车，两驱车信息
+    l = len(engine_type)
+    count = 0
+    t = 0
+    if r == 0:#不考虑正则
+        t = 80*l
+    else:
+        for i in range(0,l):
+            if engine_type[i] == "两驱":
+                count = 0
+                t += 80
+            else:
+                count += 1
+                t += 80*((1+r)**max(count-4,0))
+    return t
+
+
 #总用时
-def loss(plan, data):
+def loss(plan, data,r0 = 0,r1 = 0):
     #plan 为一个排列，代表生产顺序
     #data 为原始数据，记录生产信息
     car_type = list(data['车型'].iloc[plan])
     up_color = list(data['车顶颜色'].iloc[plan])
     body_color = list(data['车身颜色'].iloc[plan])
+    engine_type = list(data['变速器'].iloc[plan])
 
     t_1 = welding_loss(car_type)
-    t_2 = color_loss(up_color,body_color)
-    t_3 = 80*len(plan)
+    t_2 = color_loss(up_color,body_color,r0)
+    t_3 = install_loss(engine_type,r1)
     t = t_1 + t_2 + t_3
     return (t_1,t_2,t_3,t)
 
+
+'''
 #发动机约束 判断当前的约束是否满足发动机类型约束
 def engine_cons(engine_type):
     l = len(engine_type)
@@ -145,3 +119,4 @@ def engine_cons(engine_type):
         if engine_type[i] == '两驱':
             count = 0
     return res
+'''
